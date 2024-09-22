@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: auto;
+        }
+        input, button {
+            margin: 5px 0;
+            padding: 10px;
+            width: 100%;
+        }
+        .category-list {
+            margin: 10px 0;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Monthly Budget Tracker</h1>
+
+    <label for="income">Enter your monthly income:</label>
+    <input type="number" id="income" placeholder="Enter income here">
+
+    <h2>Log Your Expenses</h2>
+    <label for="category">Expense Category:</label>
+    <input type="text" id="category" placeholder="e.g., Rent, Groceries">
+
+    <label for="amount">Expense Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount">
+
+    <button onclick="logExpense()">Log Expense</button>
+
+    <div class="category-list" id="expenseList">
+        <!-- Logged expenses will be shown here -->
+    </div>
+
+    <button onclick="viewSummary()">View Budget Summary</button>
+    <button onclick="analyzeSpending()">Analyze Spending & Get Tips</button>
+
+    <div class="result" id="summaryResult">
+        <!-- Budget summary will be shown here -->
+    </div>
+
+    <script>
+        let income = 0;
+        let expenses = {};
+
+        // Function to log expenses
+        function logExpense() {
+            income = parseFloat(document.getElementById('income').value);
+            const category = document.getElementById('category').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+
+            if (category && amount) {
+                if (expenses[category]) {
+                    expenses[category] += amount;
+                } else {
+                    expenses[category] = amount;
+                }
+
+                document.getElementById('expenseList').innerHTML += `<p>${category}: $${amount.toFixed(2)} logged.</p>`;
+                document.getElementById('category').value = '';
+                document.getElementById('amount').value = '';
+            } else {
+                alert("Please enter valid category and amount.");
+            }
+        }
+
+        // Function to view budget summary
+        function viewSummary() {
+            let totalExpenses = 0;
+            let summaryText = `<h3>Budget Summary</h3><p>Monthly Income: $${income.toFixed(2)}</p><p>Expenses:</p>`;
+            for (const category in expenses) {
+                summaryText += `<p>${category}: $${expenses[category].toFixed(2)}</p>`;
+                totalExpenses += expenses[category];
+            }
+            const remainingIncome = income - totalExpenses;
+            summaryText += `<p>Total Expenses: $${totalExpenses.toFixed(2)}</p>`;
+            summaryText += `<p>Remaining Income: $${remainingIncome.toFixed(2)}</p>`;
+            document.getElementById('summaryResult').innerHTML = summaryText;
+        }
+
+        // Function to analyze spending and provide tips
+        function analyzeSpending() {
+            let totalExpenses = 0;
+            let analysisText = `<h3>Spending Analysis</h3>`;
+            const savingGoalPercentage = 20;
+            const savingGoalAmount = (savingGoalPercentage / 100) * income;
+
+            for (const category in expenses) {
+                totalExpenses += expenses[category];
+            }
+            const remainingIncome = income - totalExpenses;
+
+            // Check if savings are enough
+            if (remainingIncome < savingGoalAmount) {
+                analysisText += `<p>⚠️ You are saving less than ${savingGoalPercentage}% of your income. Consider reducing unnecessary expenses.</p>`;
+            } else {
+                analysisText += `<p>✅ You are saving at least ${savingGoalPercentage}% of your income. Great job!</p>`;
+            }
+
+            // Check for high-spending categories
+            for (const category in expenses) {
+                if (expenses[category] > 0.3 * income) {
+                    analysisText += `<p>⚠️ High spending alert: You are spending $${expenses[category].toFixed(2)} on ${category}, which is more than 30% of your income.</p>`;
+                }
+            }
+
+            // Provide specific tips
+            if (expenses['Rent'] && expenses['Rent'] > 0.4 * income) {
+                analysisText += `<p>🏠 Tip: Rent is more than 40% of your income. Consider finding a more affordable place.</p>`;
+            }
+            if (expenses['Groceries'] && expenses['Groceries'] > 0.2 * income) {
+                analysisText += `<p>🍎 Tip: Groceries are consuming over 20% of your income. Try meal planning or buying in bulk.</p>`;
+            }
+            if (expenses['Entertainment'] && expenses['Entertainment'] > 0.1 * income) {
+                analysisText += `<p>🎮 Tip: Entertainment costs are higher than recommended. Look for cheaper alternatives like free events or subscriptions.</p>`;
+            }
+
+            if (totalExpenses > income) {
+                analysisText += `<p>🚨 You are overspending by $${(totalExpenses - income).toFixed(2)}. Reduce expenses to avoid debt.</p>`;
+            } else {
+                analysisText += `<p>💡 Tip: You are within your budget. Keep tracking your expenses to maintain financial health.</p>`;
+            }
+
+            document.getElementById('summaryResult').innerHTML = analysisText;
+        }
+    </script>
+</body>
+</html>
